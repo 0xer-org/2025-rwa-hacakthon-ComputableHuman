@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BingoCategory } from "@/data/bingoGoals";
 import { ProgressBar } from "@/components/ProgressBar";
-import { ConnectButton } from "@mysten/dapp-kit";
+import { WalletConnectButton } from "@/components/WalletConnectButton";
 
 interface CategoryNavigationProps {
   categories: BingoCategory[];
@@ -75,28 +75,8 @@ export const CategoryNavigation = ({
     return (
       <div className="flex flex-col min-h-screen">
         <header className="p-4 bg-black/80 backdrop-blur-sm sticky top-0 z-10">
-          <div className="flex items-center justify-between mb-4 gap-4">
-            <h1 className="text-xl font-bold text-white flex-1 text-center">許願BINGO</h1>
-            <div className="flex-shrink-0">
-              <ConnectButton 
-                connectText="連接錢包"
-                style={{
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#3b82f6';
-                }}
-              />
-            </div>
+          <div className="flex items-center justify-center mb-4">
+            <h1 className="text-xl font-bold text-white text-center">許願BINGO</h1>
           </div>
           <ProgressBar 
             completed={totalCompleted} 
@@ -132,6 +112,19 @@ export const CategoryNavigation = ({
             ))}
           </div>
         </main>
+        {/* Wallet Connection Section - Fixed Bottom */}
+        <div className="fixed bottom-0 left-0 right-0 z-30 p-4">
+          <div className="max-w-md mx-auto">
+            <div className="pt-4 border-t border-white/10">
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm text-white/70 mb-1">連接錢包以完成賓果</p>
+                <WalletConnectButton />
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Add bottom padding to prevent content being hidden behind wallet section */}
+        <div className="h-32"></div>
       </div>
     );
   }
@@ -141,42 +134,57 @@ export const CategoryNavigation = ({
   // 子類別選擇畫面
   if (currentCategory?.subcategories && !selectedSubcategory) {
     return (
-      <div className="text-center">
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="text-white hover:bg-white/20 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回主選單
-          </Button>
-          <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg flex items-center justify-center gap-3">
-            <span className="material-icons text-3xl">{currentCategory.icon}</span>
-            {currentCategory.name}
-          </h1>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {currentCategory.subcategories.map((subcategory) => (
-            <button
-              key={subcategory.id}
-              className={cn(
-                "p-6 rounded-2xl font-bold text-lg transition-all duration-300",
-                "border border-white/20 backdrop-blur-sm",
-                "hover:scale-105 hover:shadow-xl",
-                "flex flex-col items-center gap-3",
-                currentCategory.className
-              )}
-              onClick={() => onSubcategorySelect(subcategory.id)}
+      <div className="flex flex-col min-h-screen">
+        <div className="text-center flex-grow">
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              onClick={onBack}
+              className="text-white hover:bg-white/20 mb-4"
             >
-              <span>{subcategory.name}</span>
-              <span className="text-xs font-medium text-white/70">
-                {completionStatus.get(`${selectedCategory}-${subcategory.id}`)?.completed || 0}/1
-              </span>
-            </button>
-          ))}
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回主選單
+            </Button>
+            <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg flex items-center justify-center gap-3">
+              <span className="material-icons text-3xl">{currentCategory.icon}</span>
+              {currentCategory.name}
+            </h1>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {currentCategory.subcategories.map((subcategory) => (
+              <button
+                key={subcategory.id}
+                className={cn(
+                  "p-6 rounded-2xl font-bold text-lg transition-all duration-300",
+                  "border border-white/20 backdrop-blur-sm",
+                  "hover:scale-105 hover:shadow-xl",
+                  "flex flex-col items-center gap-3",
+                  currentCategory.className
+                )}
+                onClick={() => onSubcategorySelect(subcategory.id)}
+              >
+                <span>{subcategory.name}</span>
+                <span className="text-xs font-medium text-white/70">
+                  {completionStatus.get(`${selectedCategory}-${subcategory.id}`)?.completed || 0}/1
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
+        {/* Wallet Connection Section - Fixed Bottom */}
+        <div className="fixed bottom-0 left-0 right-0 z-30 p-4">
+          <div className="max-w-md mx-auto">
+            <div className="pt-4 border-t border-white/10">
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm text-white/70 mb-1">連接錢包以完成賓果</p>
+                <WalletConnectButton />
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Add bottom padding to prevent content being hidden behind wallet section */}
+        <div className="h-32"></div>
       </div>
     );
   }

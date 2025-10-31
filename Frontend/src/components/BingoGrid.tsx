@@ -12,6 +12,7 @@ import { BingoShareView } from "./BingoShareView";
 import { getBackgroundImage } from "@/utils/backgroundConfig";
 import { useState, useEffect } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import { WalletConnectButton } from "@/components/WalletConnectButton";
 
 interface BingoGridProps {
   goals: BingoGoal[];
@@ -358,11 +359,14 @@ export const BingoGrid = ({
   return (
     <div className="max-w-4xl mx-auto bingo-container relative">
       {/* Header */}
-      <div className="text-center mb-8 animate-fade-in">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg flex items-center justify-center gap-3">
-          <span className="material-icons text-3xl">{category.icon}</span>
-          {subcategoryName || category.name}
-        </h1>
+      <div className="mb-8 animate-fade-in">
+        {/* Category Title */}
+        <div className="text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg flex items-center justify-center gap-3">
+            <span className="material-icons text-3xl">{category.icon}</span>
+            {subcategoryName || category.name}
+          </h1>
+        </div>
       </div>
 
       {/* Bingo Grid */}
@@ -400,6 +404,20 @@ export const BingoGrid = ({
           Powered by Zoo Financial<br />
           LINE: @17g8
         </span>
+      </div>
+
+      {/* Wallet Connection Section - Fixed (above footer buttons) */}
+      <div className="fixed left-0 right-0 z-30 bottom-[12rem]">
+        <div className="container mx-auto p-4">
+          <div className="max-w-md mx-auto">
+            <div className="pt-4 border-t border-white/10">
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm text-white/70 mb-1">連接錢包以完成賓果</p>
+                <WalletConnectButton />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Footer with Action Buttons */}
@@ -448,7 +466,7 @@ export const BingoGrid = ({
       </div>
 
       {/* Add bottom padding to prevent content being hidden behind footer */}
-      <div className="h-56"></div>
+      <div className="h-72"></div>
 
       {/* Back Button - Bottom Right */}
       <Button

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist Bingo App - 預覽</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #4ecdc4;
+        }
+        
+        .feature p {
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+        
+        .tech-stack {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tech-stack h3 {
+            margin-bottom: 1rem;
+            color: #ff6b6b;
+        }
+        
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .tech-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .note {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 107, 107, 0.2);
+            border-radius: 10px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 2rem auto;
+        }
+        
+        .bingo-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .bingo-cell:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .bingo-cell.selected {
+            background: rgba(78, 205, 196, 0.5);
+            border-color: #4ecdc4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Wishlist Bingo App</h1>
+        <p class="subtitle">互動式願望清單賓果遊戲</p>
+        
+        <div class="bingo-grid" id="bingoGrid">
+            <div class="bingo-cell" onclick="toggleCell(this)">🎁</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">📱</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">🎮</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">📚</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">🎵</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">🏠</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">✈️</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">🍕</div>
+            <div class="bingo-cell" onclick="toggleCell(this)">💻</div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🎯 互動遊戲</h3>
+                <p>創建個人化的願望清單賓果遊戲，讓目標達成更有趣</p>
+            </div>
+            <div class="feature">
+                <h3>📱 響應式設計</h3>
+                <p>支援桌面和行動裝置，隨時隨地追蹤您的願望</p>
+            </div>
+            <div class="feature">
+                <h3>🎨 現代化 UI</h3>
+                <p>使用 Tailwind CSS 和 shadcn/ui 打造美觀的使用者介面</p>
+            </div>
+        </div>
+        
+        <div class="tech-stack">
+            <h3>🛠️ 技術堆疊</h3>
+            <div class="tech-tags">
+                <span class="tech-tag">React</span>
+                <span class="tech-tag">TypeScript</span>
+                <span class="tech-tag">Vite</span>
+                <span class="tech-tag">Tailwind CSS</span>
+                <span class="tech-tag">shadcn/ui</span>
+                <span class="tech-tag">Capacitor</span>
+            </div>
+        </div>
+        
+        <div class="note">
+            <strong>📝 注意：</strong> 這是一個預覽頁面。完整的應用程式需要安裝 Node.js 並執行 <code>npm install</code> 和 <code>npm run dev</code> 來啟動開發伺服器。
+        </div>
+    </div>
+
+    <script>
+        function toggleCell(cell) {
+            cell.classList.toggle('selected');
+            
+            // 檢查是否有連線
+            const cells = document.querySelectorAll('.bingo-cell');
+            const selected = Array.from(cells).map(c => c.classList.contains('selected'));
+            
+            // 簡單的賓果檢查（橫、直、斜）
+            const winPatterns = [
+                [0,1,2], [3,4,5], [6,7,8], // 橫
+                [0,3,6], [1,4,7], [2,5,8], // 直
+                [0,4,8], [2,4,6] // 斜
+            ];
+            
+            for (let pattern of winPatterns) {
+                if (pattern.every(i => selected[i])) {
+                    setTimeout(() => {
+                        alert('🎉 賓果！恭喜完成一條線！');
+                    }, 100);
+                    break;
+                }
+            }
+        }
+        
+        // 添加一些動畫效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const cells = document.querySelectorAll('.bingo-cell');
+            cells.forEach((cell, index) => {
+                cell.style.animationDelay = `${index * 0.1}s`;
+                cell.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+        });
+        
+        // CSS 動畫
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

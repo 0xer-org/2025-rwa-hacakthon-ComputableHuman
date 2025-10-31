@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist Bingo App - 完整預覽</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tab-button:hover, .tab-button.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .bingo-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0.5rem;
+        }
+        
+        .bingo-cell:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .bingo-cell.marked {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-color: #fff;
+            transform: scale(0.95);
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .category-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .category-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+        
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .category-desc {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-list li:before {
+            content: "✨ ";
+            margin-right: 0.5rem;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .warning-message {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">🎯 Wishlist Bingo</div>
+            <div class="subtitle">將你的願望清單變成有趣的賓果遊戲！</div>
+        </div>
+        
+        <div class="warning-message">
+            <strong>⚠️ 注意：</strong> 這是靜態預覽版本。完整功能需要安裝 Node.js 並執行 <code>npm run dev</code>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="tab-button active" onclick="showTab('game')">🎮 遊戲</button>
+            <button class="tab-button" onclick="showTab('categories')">📂 分類</button>
+            <button class="tab-button" onclick="showTab('features')">✨ 功能</button>
+            <button class="tab-button" onclick="showTab('tech')">🛠️ 技術</button>
+        </div>
+        
+        <div id="game" class="tab-content active">
+            <h2 style="text-align: center; margin-bottom: 2rem;">🎯 Wishlist Bingo 遊戲</h2>
+            <div class="bingo-grid" id="bingoGrid">
+                <!-- 賓果格子將由 JavaScript 生成 -->
+            </div>
+            <div id="gameStatus" class="status-message" style="margin-top: 2rem; display: none;">
+                🎉 恭喜！你完成了一條線！
+            </div>
+        </div>
+        
+        <div id="categories" class="tab-content">
+            <h2 style="text-align: center; margin-bottom: 2rem;">📂 願望分類</h2>
+            <div class="categories">
+                <div class="category-card">
+                    <div class="category-icon">🎮</div>
+                    <div class="category-title">遊戲娛樂</div>
+                    <div class="category-desc">想要的遊戲、娛樂設備</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">📚</div>
+                    <div class="category-title">學習成長</div>
+                    <div class="category-desc">書籍、課程、技能提升</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🏠</div>
+                    <div class="category-title">居家生活</div>
+                    <div class="category-desc">家具、裝飾、生活用品</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">✈️</div>
+                    <div class="category-title">旅遊探索</div>
+                    <div class="category-desc">想去的地方、旅遊計畫</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">💼</div>
+                    <div class="category-title">職業發展</div>
+                    <div class="category-desc">工作目標、職涯規劃</div>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">❤️</div>
+                    <div class="category-title">健康生活</div>
+                    <div class="category-desc">健身、養生、身心健康</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="features" class="tab-content">
+            <h2 style="text-align: center; margin-bottom: 2rem;">✨ 應用程式功能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-title">🎯 互動遊戲</div>
+                    <ul class="feature-list">
+                        <li>5x5 賓果遊戲網格</li>
+                        <li>點擊標記完成項目</li>
+                        <li>自動檢測連線</li>
+                        <li>慶祝動畫效果</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">📱 現代設計</div>
+                    <ul class="feature-list">
+                        <li>響應式設計</li>
+                        <li>漸層背景效果</li>
+                        <li>毛玻璃材質</li>
+                        <li>流暢動畫過渡</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">🔧 自訂功能</div>
+                    <ul class="feature-list">
+                        <li>自訂願望項目</li>
+                        <li>分類管理系統</li>
+                        <li>進度追蹤</li>
+                        <li>資料持久化</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">📲 跨平台</div>
+                    <ul class="feature-list">
+                        <li>網頁應用程式</li>
+                        <li>Capacitor 行動應用</li>
+                        <li>PWA 支援</li>
+                        <li>離線功能</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tech" class="tab-content">
+            <h2 style="text-align: center; margin-bottom: 2rem;">🛠️ 技術堆疊</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-title">⚛️ 前端框架</div>
+                    <ul class="feature-list">
+                        <li>React 18</li>
+                        <li>TypeScript</li>
+                        <li>Vite 建置工具</li>
+                        <li>ESLint 程式碼檢查</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">🎨 UI 組件</div>
+                    <ul class="feature-list">
+                        <li>shadcn/ui 組件庫</li>
+                        <li>Radix UI 基礎組件</li>
+                        <li>Tailwind CSS</li>
+                        <li>Lucide React 圖示</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">📱 行動開發</div>
+                    <ul class="feature-list">
+                        <li>Capacitor 7.4.3</li>
+                        <li>Android 支援</li>
+                        <li>iOS 支援</li>
+                        <li>原生功能整合</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">🚀 部署平台</div>
+                    <ul class="feature-list">
+                        <li>Netlify 配置</li>
+                        <li>Vercel 支援</li>
+                        <li>GitHub Actions</li>
+                        <li>自動化部署</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 賓果遊戲項目
+        const bingoItems = [
+            "🎮 買新遊戲", "📚 讀完一本書", "🏃‍♂️ 每天運動", "🍕 學做料理", "✈️ 計畫旅行",
+            "💻 學新技能", "🎨 培養興趣", "👥 結交朋友", "🏠 整理房間", "💰 存錢目標",
+            "📱 減少滑手機", "🌱 種植物", "🎵 學樂器", "📷 拍美照", "🧘‍♀️ 冥想練習",
+            "🎬 看經典電影", "🍎 健康飲食", "📝 寫日記", "🎯 設定目標", "😊 保持快樂",
+            "🚴‍♂️ 騎腳踏車", "🎪 參加活動", "📞 聯絡老友", "🎁 準備禮物", "🌟 實現夢想"
+        ];
+        
+        let markedCells = new Set();
+        
+        // 初始化賓果遊戲
+        function initBingoGame() {
+            const grid = document.getElementById('bingoGrid');
+            grid.innerHTML = '';
+            
+            bingoItems.forEach((item, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                cell.textContent = item;
+                cell.onclick = () => toggleCell(index, cell);
+                grid.appendChild(cell);
+            });
+        }
+        
+        // 切換格子狀態
+        function toggleCell(index, cell) {
+            if (markedCells.has(index)) {
+                markedCells.delete(index);
+                cell.classList.remove('marked');
+            } else {
+                markedCells.add(index);
+                cell.classList.add('marked');
+            }
+            
+            checkWin();
+        }
+        
+        // 檢查是否獲勝
+        function checkWin() {
+            const winPatterns = [
+                // 橫線
+                [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24],
+                // 直線
+                [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24],
+                // 對角線
+                [0,6,12,18,24], [4,8,12,16,20]
+            ];
+            
+            for (let pattern of winPatterns) {
+                if (pattern.every(index => markedCells.has(index))) {
+                    document.getElementById('gameStatus').style.display = 'block';
+                    return;
+                }
+            }
+            
+            document.getElementById('gameStatus').style.display = 'none';
+        }
+        
+        // 切換分頁
+        function showTab(tabName) {
+            // 隱藏所有分頁內容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有按鈕的 active 狀態
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 顯示選中的分頁
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initBingoGame();
+        });
+    </script>
+</body>
+</html>

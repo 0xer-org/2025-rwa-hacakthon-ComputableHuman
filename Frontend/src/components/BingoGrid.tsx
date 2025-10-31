@@ -11,6 +11,7 @@ import { shareToInstagramStory } from "@/utils/instagramShare";
 import { BingoShareView } from "./BingoShareView";
 import { getBackgroundImage } from "@/utils/backgroundConfig";
 import { useState, useEffect } from "react";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 
 interface BingoGridProps {
   goals: BingoGoal[];
@@ -42,6 +43,7 @@ export const BingoGrid = ({
   onComplete,
 }: BingoGridProps) => {
   const { toast } = useToast();
+  const currentAccount = useCurrentAccount();
 
   // Onboarding tooltip state
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -72,6 +74,17 @@ export const BingoGrid = ({
       });
       return;
     }
+
+    // 檢查錢包是否已連接
+    if (!currentAccount) {
+      toast({
+        title: "請先連接錢包",
+        description: "完成賓果前需要先連接您的 Sui 錢包。",
+        variant: "destructive"
+      });
+      return;
+    }
+
     onComplete();
   };
 

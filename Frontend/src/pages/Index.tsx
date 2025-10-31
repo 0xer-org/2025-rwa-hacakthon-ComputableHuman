@@ -3,6 +3,11 @@ import { CategoryNavigation } from "@/components/CategoryNavigation";
 import { BingoGrid } from "@/components/BingoGrid";
 import { categories, getAllGoals } from "@/data/bingoGoals";
 import { useToast } from "@/hooks/use-toast";
+import { useSignAndExecuteTransaction, useCurrentAccount } from "@mysten/dapp-kit";
+import { Transaction } from "@mysten/sui/transactions";
+import { bcs } from "@mysten/sui/bcs";
+import { bingoToMatrix, matrixToU8Array } from "@/utils/bingoToMatrix";
+import { SUI_CONTRACT_CONFIG } from "@/config/suiContract";
 
 // 從 localStorage 載入數據的輔助函數
 const loadFromLocalStorage = () => {
@@ -36,12 +41,14 @@ const Index = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [completedBingos, setCompletedBingos] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const currentAccount = useCurrentAccount();
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   // 頁面載入時從 localStorage 讀取數據
   useEffect(() => {
     const { ratings, completed } = loadFromLocalStorage();
     setGoalRatings(ratings);
-    setCompletedBingos(completed);
+    setCompletedBingos(new Set(Array.from(completed).filter((item): item is string => typeof item === 'string')));
   }, []);
 
   const handleGoalClick = (goalId: string) => {
@@ -101,7 +108,7 @@ const Index = () => {
     // 如果當前賓果表已完成，保留評分記錄；如果未完成，則清除評分
     const isCurrentBingoCompleted = completedBingos.has(currentBingoKey);
     
-    let newRatings = new Map(goalRatings);
+    const newRatings = new Map(goalRatings);
     if (!isCurrentBingoCompleted) {
       // 只有未完成的賓果表才清除評分
       goals.forEach(goal => {
@@ -129,19 +136,116 @@ const Index = () => {
     });
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const currentBingoKey = getCurrentBingoKey();
-    const newCompleted = new Set(completedBingos);
-    newCompleted.add(currentBingoKey);
-    setCompletedBingos(newCompleted);
+    const goals = getCurrentGoals();
+    const gridSize = getCurrentGridSize();
     
-    // 保存到 localStorage
-    saveToLocalStorage(goalRatings, newCompleted);
+    // 检查钱包是否已连接
+    if (!currentAccount) {
+      toast({
+        title: "請先連接錢包",
+        description: "完成賓果前需要先連接您的 Sui 錢包。",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    toast({
-      title: "恭喜完成賓果！",
-      description: "你已經完成了這個賓果表！",
-    });
+    // 验证 Registry ID 是否已配置
+    const registryIdToUse = SUI_CONTRACT_CONFIG.REGISTRY_ID;
+    
+    if (!registryIdToUse || registryIdToUse === '0xYOUR_REGISTRY_ID' || !registryIdToUse.startsWith('0x') || registryIdToUse.length < 66) {
+      toast({
+        title: "配置錯誤",
+        description: "Registry Object ID 尚未配置。請先設置 REGISTRY_ID。詳見 FIND_REGISTRY_ID.md",
+        variant: "destructive",
+        duration: 5000,
+      });
+      
+      // 即使没有链上交易，也更新本地状态
+      const newCompleted = new Set(completedBingos);
+      newCompleted.add(currentBingoKey);
+      setCompletedBingos(newCompleted);
+      saveToLocalStorage(goalRatings, newCompleted);
+      
+      toast({
+        title: "已保存到本地",
+        description: "完成記錄已保存到本地。請配置 Registry ID 後可記錄到鏈上。",
+      });
+      return;
+    }
+    
+    try {
+      // 1. 将 bingo 数据转换为 16x16 矩阵
+      const matrix = bingoToMatrix(goals, goalRatings, gridSize);
+      const u8Matrix = matrixToU8Array(matrix);
+      
+      // 2. 创建交易
+      const tx = new Transaction();
+      
+      // 3. 调用合约的 mint_or_update_sbt 函数
+      // 将矩阵转换为 vector<vector<u8>> 格式
+      const matrixVector = u8Matrix.map(row => 
+        row.map(val => Number(val))
+      );
+      
+      // 使用 BCS 序列化 vector<vector<u8>>
+      // 创建嵌套向量类型：vector<vector<u8>>
+      const vectorU8Type = bcs.vector(bcs.u8());
+      const vectorVectorU8Type = bcs.vector(vectorU8Type);
+      const serializedMatrix = vectorVectorU8Type.serialize(matrixVector);
+      
+      tx.moveCall({
+        target: `${SUI_CONTRACT_CONFIG.PACKAGE_ID}::${SUI_CONTRACT_CONFIG.MODULE_NAME}::${SUI_CONTRACT_CONFIG.FUNCTION_NAME}`,
+        arguments: [
+          // registry: &mut SBTRegistry (共享对象)
+          tx.object(registryIdToUse),
+          // matrix_data: vector<vector<u8>> (使用 BCS 序列化的数据)
+          tx.pure(serializedMatrix.toBytes()),
+        ],
+      });
+      
+      // 4. 签名并执行交易
+      signAndExecuteTransaction(
+        {
+          transaction: tx,
+          chain: 'sui:testnet', // 使用 testnet（根据部署网络调整）
+        },
+        {
+          onSuccess: (result) => {
+            console.log('链上交易成功:', result);
+            
+            // 5. 更新本地状态
+            const newCompleted = new Set(completedBingos);
+            newCompleted.add(currentBingoKey);
+            setCompletedBingos(newCompleted);
+            
+            // 6. 保存到 localStorage
+            saveToLocalStorage(goalRatings, newCompleted);
+            
+            toast({
+              title: "恭喜完成賓果！",
+              description: "你的完成記錄已成功記錄在鏈上！",
+            });
+          },
+          onError: (error) => {
+            console.error('链上交易失败:', error);
+            toast({
+              title: "鏈上記錄失敗",
+              description: error.message || "請稍後重試",
+              variant: "destructive"
+            });
+          },
+        }
+      );
+    } catch (error) {
+      console.error('调用合约失败:', error);
+      toast({
+        title: "保存失敗",
+        description: error instanceof Error ? error.message : "請稍後重試",
+        variant: "destructive"
+      });
+    }
   };
 
   const getCurrentBingoKey = () => {

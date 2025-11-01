@@ -67,5 +67,27 @@ bun.lockb
 # GitHub specific
 README-GITHUB.md
 
+# Sui Move related
+*.toml.backup
+*.lock.backup
+sui_contract/build/
+**/build/
+
+# Test files
+*_tests.move
+*test*.move
+
+# Wallet and key files
+*.wallet
+*.keystore
+sui.keystore
+client.yaml
+.sui/
+
+# IDE and editor specific
+*.swp
+*.swo
+*~
+
 .vercel
 

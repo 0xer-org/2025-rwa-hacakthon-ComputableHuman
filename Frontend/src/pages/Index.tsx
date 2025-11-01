@@ -3,11 +3,12 @@ import { CategoryNavigation } from "@/components/CategoryNavigation";
 import { BingoGrid } from "@/components/BingoGrid";
 import { categories, getAllGoals } from "@/data/bingoGoals";
 import { useToast } from "@/hooks/use-toast";
-import { useSignAndExecuteTransaction, useCurrentAccount } from "@mysten/dapp-kit";
+import { useSignAndExecuteTransaction, useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { bcs } from "@mysten/sui/bcs";
 import { bingoToMatrix, matrixToU8Array } from "@/utils/bingoToMatrix";
 import { SUI_CONTRACT_CONFIG } from "@/config/suiContract";
+import { diagnoseNetwork, formatDiagnosticMessage } from "@/utils/networkDiagnostic";
 
 // 從 localStorage 載入數據的輔助函數
 const loadFromLocalStorage = () => {
@@ -42,6 +43,7 @@ const Index = () => {
   const [completedBingos, setCompletedBingos] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const currentAccount = useCurrentAccount();
+  const suiClient = useSuiClient();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   // 頁面載入時從 localStorage 讀取數據
@@ -176,6 +178,29 @@ const Index = () => {
     }
     
     try {
+      // 0. 执行网络诊断
+      console.log('執行網路診斷...');
+      const diagnostic = await diagnoseNetwork(
+        suiClient,
+        SUI_CONTRACT_CONFIG.PACKAGE_ID,
+        registryIdToUse,
+        currentAccount?.address
+      );
+      
+      console.log('診斷結果:', diagnostic);
+      console.log('診斷訊息:', formatDiagnosticMessage(diagnostic));
+      
+      // 如果有嚴重錯誤，顯示詳細診斷資訊
+      if (!diagnostic.packageExists || !diagnostic.registryExists) {
+        toast({
+          title: "網路診斷失敗",
+          description: formatDiagnosticMessage(diagnostic),
+          variant: "destructive",
+          duration: 10000,
+        });
+        return;
+      }
+      
       // 1. 将 bingo 数据转换为 16x16 矩阵
       const matrix = bingoToMatrix(goals, goalRatings, gridSize);
       const u8Matrix = matrixToU8Array(matrix);
@@ -209,7 +234,6 @@ const Index = () => {
       signAndExecuteTransaction(
         {
           transaction: tx,
-          chain: 'sui:testnet', // 使用 testnet（根据部署网络调整）
         },
         {
           onSuccess: (result) => {
@@ -230,9 +254,25 @@ const Index = () => {
           },
           onError: (error) => {
             console.error('链上交易失败:', error);
+            console.error('Error details:', error);
+            
+            // 更詳細的錯誤訊息
+            let errorMessage = "請稍後重試";
+            const errorString = error.message || String(error);
+            
+            if (errorString.includes("object does not exist") || errorString.includes("packaged object doesn't exist")) {
+              errorMessage = "合約物件不存在，請檢查網路連線是否為 Testnet";
+            } else if (errorString.includes("Insufficient gas")) {
+              errorMessage = "Gas 不足，請確保錢包有足夠 SUI";
+            } else if (errorString.includes("Transaction rejected")) {
+              errorMessage = "交易被拒絕，請重新嘗試";
+            } else if (errorString.includes("Network mismatch")) {
+              errorMessage = "網路不匹配，請確保錢包連接到 Testnet";
+            }
+            
             toast({
               title: "鏈上記錄失敗",
-              description: error.message || "請稍後重試",
+              description: errorMessage,
               variant: "destructive"
             });
           },

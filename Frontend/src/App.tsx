@@ -20,7 +20,7 @@ const { networkConfig } = createNetworkConfig({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
+    <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
       <WalletProvider>
         <TooltipProvider>
           <Toaster />

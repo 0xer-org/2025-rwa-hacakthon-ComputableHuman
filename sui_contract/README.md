@@ -69,7 +69,6 @@ public entry fun mint_or_update_sbt(
 ### 1. 部署合約
 ```bash
 cd sui_contract
-./deploy.sh
 ```
 
 ### 2. 前端集成
